@@ -24,9 +24,11 @@ class SportsAdapter(
             onClickListener: OnClickListener
         ) {
             banner.setImageResource(sports.banner)
+            banner.transitionName = sports.banner.toString()
             title.text = sports.title
+            title.transitionName = sports.title
             itemView.setOnClickListener {
-                onClickListener.onClick(sports)
+                onClickListener.onClick(sports, banner, title)
             }
         }
     }
@@ -48,9 +50,11 @@ class SportsAdapter(
 
     override fun getItemCount() = sportsList.size
 
-    class OnClickListener(val clickListener: (Sports) -> Unit) {
+    class OnClickListener(val clickListener: (Sports, ImageView, TextView) -> Unit) {
         fun onClick(
-            sports: Sports
-        ) = clickListener(sports)
+            sports: Sports,
+            iconImageView: ImageView,
+            title: TextView
+        ) = clickListener(sports, iconImageView, title)
     }
 }
