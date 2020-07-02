@@ -5,9 +5,12 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.doOnPreDraw
 import androidx.navigation.NavDirections
+import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
+import androidx.transition.TransitionInflater
 import com.developersbreach.sharedelementtransitionexample.R
 
 
@@ -20,7 +23,10 @@ class ListFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_list, container, false)
+        val view = inflater.inflate(R.layout.fragment_list, container, false)
+        sharedElementReturnTransition =
+            TransitionInflater.from(context).inflateTransition(android.R.transition.move)
+        return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -30,11 +36,23 @@ class ListFragment : Fragment() {
         val list = Sports.sportsList(requireContext())
         val adapter = SportsAdapter(list, sportsItemListener)
         recyclerView.adapter = adapter
+
+        // When user hits back button transition takes backward
+        postponeEnterTransition()
+        recyclerView.doOnPreDraw {
+            startPostponedEnterTransition()
+        }
     }
 
-    private val sportsItemListener = SportsAdapter.OnClickListener { sports ->
+    private val sportsItemListener = SportsAdapter.OnClickListener { sports, imageView, textView ->
         val direction: NavDirections =
             ListFragmentDirections.listToDetailFragment(sports)
-        findNavController().navigate(direction)
+
+        val extras = FragmentNavigatorExtras(
+            imageView to sports.banner.toString(),
+            textView to sports.title
+        )
+
+        findNavController().navigate(direction, extras)
     }
 }
